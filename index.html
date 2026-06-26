@@ -3,1034 +3,603 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#1e5a96">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Dr. Nexus">
-<meta name="description" content="Dr. Nexus — Calculadora de inflación profesional. Análisis de poder adquisitivo, proyecciones y escenarios comparativos.">
-<meta property="og:title" content="Dr. Nexus | Calculadora de Inflación">
-<meta property="og:description" content="Análisis financiero cuántico de inflación acumulada, poder adquisitivo y proyecciones futuras.">
-<meta property="og:type" content="website">
-<title>Dr. Nexus | Calculadora de Inflación</title>
+<meta name="apple-mobile-web-app-title" content="Nexus Pro">
+<meta name="description" content="Nexus Pro — Análisis de inflación + Gestor de finanzas inteligente">
+<title>Nexus Pro | Finanzas Inteligentes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script>
 (function(){
-  var sw='self.addEventListener("install",function(e){self.skipWaiting();});self.addEventListener("activate",function(e){clients.claim();});self.addEventListener("fetch",function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return new Response("<h1>NEXUS OFFLINE</h1>",{headers:{"Content-Type":"text/html"}});});})  );});';
-  var b=new Blob([sw],{type:'application/javascript'});
-  var u=URL.createObjectURL(b);
-  if('serviceWorker' in navigator) navigator.serviceWorker.register(u).catch(function(){});
-  var ico='data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#0a0a0a"/><text x="96" y="82" font-size="48" text-anchor="middle" fill="#00ff41" font-family="monospace">Dr.</text><text x="96" y="138" font-size="36" text-anchor="middle" fill="#00ff41" font-family="monospace">NEXUS</text></svg>');
-  var m={name:"Dr. Nexus | Inflación",short_name:"Dr. Nexus",description:"Calculadora de inflación profesional y análisis de poder adquisitivo",start_url:".",display:"standalone",background_color:"#0a0a0a",theme_color:"#0a0a0a",orientation:"portrait",icons:[{src:ico,sizes:"192x192",type:"image/svg+xml"},{src:ico,sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+  if('serviceWorker' in navigator) {
+    var sw='self.addEventListener("install",e=>self.skipWaiting());self.addEventListener("activate",e=>clients.claim());self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response("<h1>Offline</h1>",{headers:{"Content-Type":"text/html"}})))));';
+    var b=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(b)).catch(()=>{});
+  }
+  var m={name:"Nexus Pro",short_name:"Nexus",description:"Finanzas inteligentes",start_url:".",display:"standalone",background_color:"#ffffff",theme_color:"#1e5a96",orientation:"portrait"};
   var ml=document.createElement('link');ml.rel='manifest';ml.href='data:application/manifest+json,'+encodeURIComponent(JSON.stringify(m));document.head.appendChild(ml);
 })();
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0a0a0a;--bg2:#0f0f0f;--card:#131313;--card2:#1a1a1a;
-  --green:#00ff41;--green-dim:#00cc33;--green-dark:rgba(0,255,65,0.08);
-  --amber:#ffaa00;--red:#ff3355;--blue:#00aaff;--purple:#aa00ff;
-  --text:#e0e0e0;--text-dim:#666;--text-mid:#999;
-  --border:#222;--border-green:rgba(0,255,65,0.25);
-  --mono:'Share Tech Mono',monospace;--head:'Rajdhani',sans-serif;
-  --r:14px;
+  --primary:#1e5a96;--primary-light:#3b7dbd;--primary-dark:#0d3d5c;
+  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+  --bg:#f5f7fa;--bg-card:#ffffff;--bg-alt:#f9fafb;
+  --text:#1f2937;--text-light:#6b7280;--text-lighter:#9ca3af;
+  --border:#e5e7eb;--border-light:#f3f4f6;
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --shadow:0 1px 3px 0 rgba(0,0,0,.1);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.1);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1);
+  --r:12px;
 }
-html,body{height:100%;overflow-x:hidden;background:var(--bg);color:var(--text)}
-body{display:flex;flex-direction:column;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
-
-/* MATRIX CANVAS */
-#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.04}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-sans)}
+body{display:flex;flex-direction:column;min-height:100vh}
 
 /* HEADER */
 .hdr{
-  position:sticky;top:0;z-index:100;
-  background:rgba(10,10,10,0.96);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border-green);
-  padding:0 20px;
-  display:flex;align-items:center;justify-content:space-between;height:58px;
+  background:var(--primary);color:white;padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);
 }
-.hdr-logo{display:flex;align-items:center;gap:10px}
-.hdr-dot{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--green-dark);border:1px solid var(--border-green);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:12px;color:var(--green);
-  position:relative;overflow:hidden;
+.hdr-logo{display:flex;align-items:center;gap:12px}
+.hdr-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.2);display:flex;align-items:center;
+  justify-content:center;font-size:18px;
 }
-.hdr-dot::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent 40%,rgba(0,255,65,0.1) 100%);
-}
-.hdr-name{font-family:var(--head);font-size:17px;font-weight:700;letter-spacing:3px;color:var(--green);text-transform:uppercase}
-.hdr-sub{font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:1.5px}
-.hdr-status{
-  display:flex;flex-direction:column;align-items:flex-end;gap:3px
-}
-.status-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 8px var(--green);
-  animation:blink 2s infinite;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.status-txt{font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:1px}
+.hdr-name{font-size:18px;font-weight:700;letter-spacing:0.5px}
+.hdr-sub{font-size:11px;opacity:0.8}
+.status-icon{width:8px;height:8px;border-radius:50%;background:white;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-/* SCROLL MAIN */
-.main{flex:1;overflow-y:auto;position:relative;z-index:1}
-
-/* GAUGE HERO */
-.gauge-hero{
-  background:linear-gradient(180deg,rgba(0,255,65,0.04) 0%,transparent 100%);
-  padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;
-  border-bottom:1px solid var(--border);
+/* NAV TABS */
+.nav-tabs{
+  display:flex;gap:4px;padding:8px 12px;background:var(--bg-card);
+  border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:99;
 }
-.gauge-wrap{position:relative;width:290px;height:170px}
-.gauge-wrap svg{width:100%;height:100%}
-.gauge-center{
-  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);text-align:center;
+.nav-tab{
+  flex:1;padding:10px 8px;border:none;border-radius:8px;
+  background:transparent;color:var(--text-light);font-weight:500;
+  font-size:13px;cursor:pointer;transition:all .2s;text-align:center;
 }
-.gauge-big{
-  font-family:var(--mono);font-size:44px;color:var(--green);line-height:1;
-  text-shadow:0 0 40px rgba(0,255,65,0.6);
-  transition:color .5s,text-shadow .5s;
+.nav-tab.active{
+  background:var(--primary);color:white;box-shadow:var(--shadow);
 }
-.gauge-lbl{font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-top:3px}
-.gauge-sub-row{display:flex;gap:24px;margin-top:10px}
-.gauge-sub{text-align:center}
-.gauge-sub-val{font-family:var(--mono);font-size:14px;color:var(--text)}
-.gauge-sub-lbl{font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px}
 
-/* PAGES */
-.page{display:none}
-.page.active{display:block}
+/* MAIN */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-/* CARDS */
-.cards{padding:14px 14px 4px;display:flex;flex-direction:column;gap:12px}
+/* PAGE */
+.page{display:none;padding:16px}
+.page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* SECTION TITLE */
+.section-title{
+  font-size:13px;font-weight:600;color:var(--text-light);
+  text-transform:uppercase;letter-spacing:0.5px;margin:20px 0 12px;
+}
+
+/* CARD */
 .card{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
-  padding:18px;position:relative;overflow:hidden;
-  transition:border-color .3s;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);
 }
-.card:focus-within{border-color:var(--border-green)}
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--green),transparent);
-  opacity:0;transition:opacity .3s;
-}
-.card:focus-within::before{opacity:0.4}
-.card-hdr{
-  display:flex;align-items:center;gap:8px;margin-bottom:14px;
-}
-.card-hdr-icon{
-  width:24px;height:24px;border-radius:6px;background:var(--green-dark);
-  border:1px solid var(--border-green);display:flex;align-items:center;justify-content:center;
-  font-size:12px;flex-shrink:0;
-}
-.card-title{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:2px;color:var(--green);text-transform:uppercase}
 
-/* TABS */
-.tabs{display:flex;gap:0;background:var(--bg);border-radius:10px;padding:3px;border:1px solid var(--border);margin-bottom:14px}
-.tab{
-  flex:1;font-family:var(--mono);font-size:10px;letter-spacing:1px;
-  padding:9px 2px;border:none;border-radius:8px;cursor:pointer;
-  background:transparent;color:var(--text-dim);transition:all .2s;text-transform:uppercase;
+/* BALANCE CARD */
+.balance-card{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);
+  color:white;border:none;padding:24px;margin-bottom:16px;
+  border-radius:16px;box-shadow:var(--shadow-lg);
 }
-.tab.active{background:var(--green);color:#000;font-weight:700;box-shadow:0 0 14px rgba(0,255,65,0.3)}
+.balance-label{
+  font-size:12px;opacity:0.9;text-transform:uppercase;
+  letter-spacing:1px;font-weight:500;margin-bottom:8px;
+}
+.balance-amount{
+  font-size:36px;font-weight:700;margin-bottom:20px;font-family:var(--font-mono);
+}
+.balance-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-item{background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;
+  border:1px solid rgba(255,255,255,0.2)}
+.stat-label{font-size:11px;opacity:0.9;margin-bottom:4px;text-transform:uppercase}
+.stat-value{font-size:16px;font-weight:700;font-family:var(--font-mono)}
 
-/* FIELDS */
-.field{margin-bottom:12px}
-.field:last-child{margin-bottom:0}
-.field label{
-  display:flex;align-items:center;gap:6px;
-  font-family:var(--mono);font-size:10px;color:var(--text-dim);
-  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;
+/* FORM */
+.form-group{margin-bottom:14px}
+.form-group:last-child{margin-bottom:0}
+.form-label{
+  display:block;font-size:12px;font-weight:600;color:var(--text);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;
 }
-.lbl-tag{
-  font-family:var(--mono);font-size:8px;padding:1px 5px;
-  background:var(--green-dark);border:1px solid var(--border-green);
-  border-radius:3px;color:var(--green);
+.form-input,.form-select{
+  width:100%;padding:11px 12px;border:1px solid var(--border);
+  border-radius:8px;font-size:14px;font-family:var(--font-sans);
+  background:var(--bg-alt);color:var(--text);transition:all .2s;
 }
-.iw{position:relative}
-.ip{
-  position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  font-family:var(--mono);font-size:13px;color:var(--green);pointer-events:none;z-index:1;
+.form-input:focus,.form-select:focus{
+  outline:none;border-color:var(--primary);
+  background:white;box-shadow:0 0 0 3px rgba(30,90,150,0.1);
 }
-.is{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  font-family:var(--mono);font-size:10px;color:var(--text-dim);pointer-events:none;
-}
-input[type=number],select{
-  width:100%;background:#000;border:1px solid #333;border-radius:9px;
-  color:var(--text);font-family:var(--mono);font-size:15px;
-  padding:12px 12px 12px 30px;outline:none;
-  -webkit-appearance:none;appearance:none;
-  transition:border-color .2s,box-shadow .2s;
-}
-input[type=number]:focus,select:focus{
-  border-color:var(--border-green);
-  box-shadow:0 0 0 3px rgba(0,255,65,0.07),0 0 20px rgba(0,255,65,0.05);
-}
-.nopre{padding-left:12px!important}
-select option{background:#111;color:var(--text)}
 
-/* RANGE */
-input[type=range]{
-  width:100%;-webkit-appearance:none;appearance:none;
-  height:3px;border-radius:2px;outline:none;cursor:pointer;
-  background:linear-gradient(to right,var(--green) 0%,var(--green) var(--rp,50%),#222 var(--rp,50%),#222 100%);
+/* BUTTONS */
+.btn-group{display:flex;gap:8px;margin-top:16px}
+.btn{
+  flex:1;padding:12px 16px;border:none;border-radius:8px;
+  font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;
+  text-transform:uppercase;letter-spacing:0.5px;
+  font-family:var(--font-sans);
 }
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:20px;height:20px;
-  border-radius:50%;background:var(--green);
-  box-shadow:0 0 14px rgba(0,255,65,0.7);border:2px solid #000;
+.btn-primary{
+  background:var(--primary);color:white;box-shadow:var(--shadow);
 }
-.rl{display:flex;justify-content:space-between;margin-top:5px}
-.rl span{font-family:var(--mono);font-size:9px;color:var(--text-dim)}
-
-/* PRESETS */
-.presets{display:flex;flex-wrap:wrap;gap:7px}
-.preset{
-  font-family:var(--mono);font-size:10px;letter-spacing:.5px;
-  padding:5px 11px;border-radius:20px;border:1px solid #333;
-  background:transparent;color:var(--text-dim);cursor:pointer;transition:all .2s;
+.btn-primary:active{background:var(--primary-dark);transform:scale(0.98)}
+.btn-secondary{
+  background:var(--bg-alt);color:var(--text);border:1px solid var(--border);
 }
-.preset.sel,.preset:active{background:var(--green-dark);border-color:var(--green);color:var(--green)}
-
-/* BTN */
-.btn-go{
-  width:100%;padding:16px;border:none;border-radius:10px;
-  font-family:var(--head);font-size:16px;font-weight:700;letter-spacing:3px;
-  text-transform:uppercase;cursor:pointer;overflow:hidden;position:relative;
-  background:linear-gradient(135deg,var(--green),var(--green-dim));color:#000;
-  box-shadow:0 4px 24px rgba(0,255,65,0.25);transition:transform .15s,box-shadow .2s;
+.btn-secondary:active{background:var(--border-light)}
+.btn-danger{
+  background:var(--danger);color:white;
 }
-.btn-go:active{transform:scale(0.97);box-shadow:0 2px 10px rgba(0,255,65,0.2)}
-.btn-go::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.12),transparent);pointer-events:none}
-.btn-clr{
-  width:100%;padding:11px;border:1px solid #333;border-radius:10px;
-  font-family:var(--mono);font-size:11px;letter-spacing:1px;
-  text-transform:uppercase;cursor:pointer;background:transparent;color:var(--text-dim);margin-top:8px;
-  transition:all .2s;
-}
-.btn-clr:active{border-color:var(--red);color:var(--red)}
-.btn-save{
-  width:100%;padding:12px;border:1px solid var(--border-green);border-radius:10px;
-  font-family:var(--mono);font-size:11px;letter-spacing:1px;
-  text-transform:uppercase;cursor:pointer;background:var(--green-dark);color:var(--green);
-  transition:all .2s;
-}
-.btn-save:active{background:rgba(0,255,65,0.15)}
+.btn-danger:active{opacity:0.9}
 
 /* RESULTS */
-.results{display:none;flex-direction:column;gap:10px;margin-top:4px}
-.results.on{display:flex}
-.rg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.ri{background:var(--card2);border-radius:10px;padding:13px;border:1px solid var(--border);transition:border-color .3s}
-.ri.full{grid-column:1/-1}
-.ri.hl{border-color:var(--border-green);background:rgba(0,255,65,0.04)}
-.ri.warn{border-color:rgba(255,51,85,0.3);background:rgba(255,51,85,0.04)}
-.ri.good{border-color:rgba(0,170,255,0.3);background:rgba(0,170,255,0.04)}
-.rl2{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px}
-.rv{font-family:var(--mono);font-size:19px;line-height:1;transition:color .4s}
-.rv.g{color:var(--green);text-shadow:0 0 20px rgba(0,255,65,0.3)}
-.rv.r{color:var(--red)}
-.rv.b{color:var(--blue)}
-.rv.a{color:var(--amber)}
-.rsub{font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-top:4px}
-
-/* MINI BAR CHART */
-.bar-chart{margin-top:12px}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.bar-yr{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:32px;flex-shrink:0}
-.bar-track{flex:1;height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
-.bar-val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:52px;text-align:right;flex-shrink:0}
-
-/* PROJECTION TABLE */
-.ptbl{width:100%;border-collapse:collapse;margin-top:8px}
-.ptbl th{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;text-align:left;padding:6px 6px;border-bottom:1px solid var(--border)}
-.ptbl td{font-family:var(--mono);font-size:12px;padding:7px 6px;border-bottom:1px solid rgba(34,34,34,.6);color:var(--text)}
-.ptbl td.hi{color:var(--red)}
-.ptbl td.lo{color:var(--green)}
-.ptbl td.mid{color:var(--amber)}
-.ptbl tr:last-child td{border-bottom:none}
-
-/* COMPARADOR */
-.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-.cmp-col{background:#000;border-radius:10px;padding:12px;border:1px solid var(--border)}
-.cmp-hdr{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;text-align:center}
-.cmp-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
-.cmp-row:last-child{border-bottom:none}
-.cmp-k{font-family:var(--mono);font-size:9px;color:var(--text-dim)}
-.cmp-v{font-family:var(--mono);font-size:10px}
-
-/* RATES PAGE */
-.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.rate-chip{background:#000;border-radius:10px;padding:11px;border:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
-.rc-flag{font-size:18px}
-.rc-name{font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:.5px}
-.rc-val{font-family:var(--mono);font-size:17px}
-.rc-val.hi{color:var(--red)}
-.rc-val.mid{color:var(--amber)}
-.rc-val.lo{color:var(--green)}
-.rc-yr{font-family:var(--mono);font-size:8px;color:var(--text-dim)}
-
-/* FORMULA */
-.fml{background:#000;border-radius:9px;padding:13px;border:1px solid var(--border);overflow-x:auto;margin-top:8px}
-.fml code{font-family:var(--mono);font-size:11px;color:var(--amber);line-height:1.9;white-space:pre;display:block}
-
-/* HIST */
-.hist-list{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto}
-.hi-item{background:#000;border-radius:10px;padding:12px 14px;border-left:3px solid var(--green);cursor:pointer;transition:background .2s}
-.hi-item:active{background:#111}
-.hi-top{display:flex;justify-content:space-between;align-items:center}
-.hi-main{font-family:var(--mono);font-size:12px;color:var(--green)}
-.hi-pct{font-family:var(--mono);font-size:12px;color:var(--amber)}
-.hi-sub{font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-top:3px}
-.empty{text-align:center;padding:36px 16px;font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:1px}
-.empty-ico{font-size:36px;margin-bottom:10px}
-
-/* BOTTOM NAV */
-.bnav{
-  position:sticky;bottom:0;z-index:100;
-  background:rgba(10,10,10,0.97);backdrop-filter:blur(24px);
-  border-top:1px solid var(--border);
-  display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+.results-box{display:none;padding:16px;background:linear-gradient(135deg,rgba(30,90,150,0.08),rgba(16,185,129,0.04));
+  border:1px solid rgba(30,90,150,0.15);border-radius:var(--r);margin-bottom:12px}
+.results-box.show{display:block}
+.result-item{
+  padding:12px;background:var(--bg-card);border-left:4px solid var(--primary);
+  border-radius:8px;margin-bottom:10px;
 }
-.ni{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:5px 2px;border:none;background:transparent;cursor:pointer;
-  color:var(--text-dim);transition:color .2s;
+.result-item.success{border-left-color:var(--success)}
+.result-item.warning{border-left-color:var(--warning)}
+.result-item.danger{border-left-color:var(--danger)}
+.result-label{font-size:11px;color:var(--text-light);text-transform:uppercase;margin-bottom:4px}
+.result-value{font-size:20px;font-weight:700;color:var(--primary);font-family:var(--font-mono)}
+.result-item.success .result-value{color:var(--success)}
+.result-item.warning .result-value{color:var(--warning)}
+.result-item.danger .result-value{color:var(--danger)}
+.result-note{font-size:12px;color:var(--text-light);margin-top:4px}
+
+/* TRANSACTIONS */
+.tx-list{display:flex;flex-direction:column;gap:8px}
+.tx-item{
+  background:var(--bg-alt);border-left:4px solid var(--text-lighter);
+  border-radius:10px;padding:12px;display:flex;
+  justify-content:space-between;align-items:center;
+  cursor:pointer;transition:all .2s;
 }
-.ni.active{color:var(--green)}
-.ni-ico{font-size:19px;line-height:1}
-.ni-lbl{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase}
+.tx-item.income{border-left-color:var(--success)}
+.tx-item.expense{border-left-color:var(--danger)}
+.tx-item:active{background:var(--border-light);transform:translateX(-2px)}
+.tx-info{flex:1}
+.tx-name{font-weight:600;color:var(--text);font-size:14px}
+.tx-meta{font-size:12px;color:var(--text-light);margin-top:2px}
+.tx-meta span{margin-right:6px}
+.tx-amount{font-weight:700;font-size:14px;font-family:var(--font-mono)}
+.tx-amount.income{color:var(--success)}
+.tx-amount.expense{color:var(--danger)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text-light)}
+.empty-icon{font-size:48px;margin-bottom:12px;opacity:0.6}
+.empty-text{font-size:14px;line-height:1.6}
 
 /* TOAST */
-.toast{
-  position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(14px);
-  background:var(--card2);border:1px solid var(--border-green);border-radius:9px;
-  padding:9px 18px;font-family:var(--mono);font-size:11px;color:var(--green);
-  opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;
-  box-shadow:0 4px 20px rgba(0,255,65,0.15);
+#toast{
+  position:fixed;bottom:20px;left:16px;right:16px;
+  background:var(--text);color:white;padding:14px 16px;
+  border-radius:8px;font-size:13px;font-weight:500;
+  z-index:200;opacity:0;transform:translateY(20px);
+  transition:all .3s;pointer-events:none;box-shadow:var(--shadow-lg);
 }
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.show{opacity:1;transform:translateY(0);pointer-events:auto}
 
-/* SCAN LINE ON HEADER */
-.scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:sc 3s linear infinite;opacity:.3;pointer-events:none}
-@keyframes sc{0%{top:0;opacity:.3}50%{opacity:.7}100%{top:100%;opacity:.3}}
+/* TABLE */
+.table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.table th{background:var(--bg-alt);padding:10px;text-align:left;
+  border-bottom:1px solid var(--border);font-weight:600;color:var(--text-light);
+  text-transform:uppercase;font-size:11px;letter-spacing:0.5px}
+.table td{padding:12px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.table tr:hover{background:var(--bg-alt)}
+.table .positive{color:var(--success);font-weight:600}
+.table .negative{color:var(--danger);font-weight:600}
 
-/* REGLA DEL 70 VISUAL */
-.r70-bar{display:flex;align-items:center;gap:10px;margin-top:8px}
-.r70-icons{display:flex;gap:4px;flex-wrap:wrap;flex:1}
-.r70-ico{font-size:14px;opacity:.3;transition:opacity .5s}
-.r70-ico.on{opacity:1}
-
-/* ABOUT / QR SECTION */
-.qr-section{
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  padding:10px 0 4px;
+/* GAUGE */
+.gauge-container{position:relative;width:220px;height:140px;margin:0 auto 20px}
+.gauge-svg{width:100%;height:100%}
+.gauge-value{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  text-align:center;
 }
-.qr-frame{
-  width:140px;height:140px;border-radius:12px;
-  background:#000;border:2px solid var(--border-green);
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
+.gauge-main{font-size:32px;font-weight:700;color:var(--primary);font-family:var(--font-mono)}
+.gauge-label{font-size:11px;color:var(--text-light);margin-top:2px}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .balance-amount{font-size:28px}
+  .btn-group{flex-direction:column}
+  .nav-tabs{gap:2px}
+  .nav-tab{font-size:12px;padding:8px 6px}
 }
-.qr-inner{width:110px;height:110px}
-.qr-lbl{font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;text-align:center}
-.qr-url{font-family:var(--mono);font-size:11px;color:var(--green);text-align:center;margin-top:2px;word-break:break-all}
-.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-.info-row:last-child{border-bottom:none}
-.info-k{font-family:var(--mono);font-size:10px;color:var(--text-dim)}
-.info-v{font-family:var(--mono);font-size:11px;color:var(--text)}
 </style>
 </head>
 <body>
 
-<canvas id="matrix-canvas"></canvas>
-
+<!-- HEADER -->
 <div class="hdr">
-  <div class="scan"></div>
   <div class="hdr-logo">
-    <div class="hdr-dot">Nx</div>
+    <div class="hdr-icon">₹</div>
     <div>
-      <div class="hdr-name">Dr. Nexus</div>
-      <div class="hdr-sub">INFLATION ANALYZER v3.0</div>
+      <div class="hdr-name">Nexus Pro</div>
+      <div class="hdr-sub">Finanzas Inteligentes</div>
     </div>
   </div>
-  <div class="hdr-status">
-    <div class="status-dot"></div>
-    <div class="status-txt" id="hdr-clock">--:--</div>
-    <div class="status-txt">ONLINE</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="status-icon"></div>
+    <span style="font-size:11px">Online</span>
   </div>
 </div>
 
+<!-- NAVIGATION TABS -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchPage('inflacion', event)">📊 Inflación</div>
+  <div class="nav-tab" onclick="switchPage('gastos', event)">💰 Gastos</div>
+  <div class="nav-tab" onclick="switchPage('historial', event)">📂 Historial</div>
+</div>
+
+<!-- MAIN CONTENT -->
 <div class="main">
 
-  <!-- GAUGE HERO (visible en todas las páginas de cálculo) -->
-  <div class="gauge-hero">
-    <div class="gauge-wrap">
-      <svg viewBox="0 0 290 170" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="gA" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#00ff41"/>
-            <stop offset="40%" stop-color="#ffaa00"/>
-            <stop offset="100%" stop-color="#ff3355"/>
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <!-- Track ticks -->
-        <path d="M 28 152 A 117 117 0 0 1 262 152" stroke="#1a1a1a" stroke-width="18" fill="none" stroke-linecap="round"/>
-        <!-- Colored fill arc -->
-        <path id="gf" d="M 28 152 A 117 117 0 0 1 262 152"
-          stroke="url(#gA)" stroke-width="18" fill="none" stroke-linecap="round"
-          stroke-dasharray="367" stroke-dashoffset="367" filter="url(#glow)"
-          style="transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1)"/>
-        <!-- Subtle tick marks -->
-        <g stroke="#2a2a2a" stroke-width="1.5">
-          <line x1="145" y1="35" x2="145" y2="48"/>
-          <line x1="46" y1="90" x2="57" y2="96"/>
-          <line x1="244" y1="90" x2="233" y2="96"/>
-          <line x1="73" y1="47" x2="81" y2="56"/>
-          <line x1="217" y1="47" x2="209" y2="56"/>
-        </g>
-        <!-- Needle -->
-        <line id="gneedle" x1="145" y1="152" x2="145" y2="52"
-          stroke="rgba(0,255,65,0.8)" stroke-width="2.5" stroke-linecap="round"
-          style="transform-origin:145px 152px;transform:rotate(-90deg);transition:transform 1.3s cubic-bezier(.4,0,.2,1)"/>
-        <circle cx="145" cy="152" r="7" fill="var(--green)" opacity="0.9" filter="url(#glow)"/>
-        <circle cx="145" cy="152" r="3" fill="#000"/>
-        <!-- Tick labels -->
-        <text x="20" y="165" font-family="Share Tech Mono" font-size="9" fill="#444" text-anchor="middle">0%</text>
-        <text x="72" y="58" font-family="Share Tech Mono" font-size="9" fill="#444" text-anchor="middle">25%</text>
-        <text x="145" y="35" font-family="Share Tech Mono" font-size="9" fill="#444" text-anchor="middle">50%</text>
-        <text x="218" y="58" font-family="Share Tech Mono" font-size="9" fill="#444" text-anchor="middle">75%</text>
-        <text x="270" y="165" font-family="Share Tech Mono" font-size="9" fill="#444" text-anchor="middle">100+</text>
-      </svg>
-      <div class="gauge-center">
-        <div class="gauge-big" id="gval">0.00<span style="font-size:20px">%</span></div>
-        <div class="gauge-lbl">INFLACIÓN ACUMULADA</div>
-      </div>
-    </div>
-    <div class="gauge-sub-row">
-      <div class="gauge-sub">
-        <div class="gauge-sub-val" id="gs-final">—</div>
-        <div class="gauge-sub-lbl">VALOR FINAL</div>
-      </div>
-      <div class="gauge-sub" style="border-left:1px solid var(--border);border-right:1px solid var(--border);padding:0 20px">
-        <div class="gauge-sub-val" id="gs-diff" style="color:var(--red)">—</div>
-        <div class="gauge-sub-lbl">INCREMENTO</div>
-      </div>
-      <div class="gauge-sub">
-        <div class="gauge-sub-val" id="gs-pa" style="color:var(--blue)">—</div>
-        <div class="gauge-sub-lbl">PODER ADQUIS.</div>
+<!-- PAGE: INFLACIÓN -->
+<div id="pg-inflacion" class="page active">
+  <div class="section-title">Análisis de Inflación</div>
+
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">Modalidad</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <button class="btn-tab" onclick="setMode('simple')" data-mode="simple" style="padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-alt);cursor:pointer;font-weight:600;font-size:12px">Simple</button>
+        <button class="btn-tab" onclick="setMode('compuesta')" data-mode="compuesta" style="padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-alt);cursor:pointer;font-weight:600;font-size:12px">Compuesta</button>
+        <button class="btn-tab" onclick="setMode('proyeccion')" data-mode="proyeccion" style="padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-alt);cursor:pointer;font-weight:600;font-size:12px">Proyección</button>
       </div>
     </div>
   </div>
 
-  <!-- PAGE: CALCULADORA -->
-  <div class="page active" id="page-calc">
-    <div class="cards">
-
-      <!-- MODE TABS -->
-      <div>
-        <div class="tabs">
-          <button class="tab active" onclick="setMode('simple')">Simple</button>
-          <button class="tab" onclick="setMode('compuesta')">Compuesta</button>
-          <button class="tab" onclick="setMode('proyeccion')">Proyección</button>
-          <button class="tab" onclick="setMode('comparar')">Comparar</button>
-        </div>
-      </div>
-
-      <!-- PANEL SIMPLE -->
-      <div class="card" id="panel-simple">
-        <div class="card-hdr"><div class="card-hdr-icon">⚡</div><div class="card-title">Período Simple</div></div>
-        <div class="field">
-          <label>Monto inicial <span class="lbl-tag">BASE</span></label>
-          <div class="iw"><span class="ip" id="sy-s">$</span>
-          <input type="number" id="s-monto" inputmode="decimal" placeholder="1,000.00" min="0" step="0.01"></div>
-        </div>
-        <div class="field">
-          <label>Tasa de inflación total <span class="lbl-tag">%</span></label>
-          <div class="iw"><span class="ip">%</span>
-          <input type="number" id="s-tasa" inputmode="decimal" placeholder="35.0" min="0" step="0.1"></div>
-        </div>
-        <div class="field">
-          <label>Moneda</label>
-          <div class="iw"><select id="s-mon" class="nopre" onchange="chgSym('s')">
-            <option value="$">🇲🇽 Peso MXN</option>
-            <option value="US$">🇺🇸 Dólar USD</option>
-            <option value="€">🇪🇺 Euro</option>
-            <option value="$">🇦🇷 Peso ARS</option>
-            <option value="S/.">🇵🇪 Sol PEN</option>
-            <option value="COP$">🇨🇴 Peso COP</option>
-            <option value="Bs.">🇻🇪 Bolívar</option>
-          </select></div>
-        </div>
-        <div class="field">
-          <label>Presets rápidos</label>
-          <div class="presets">
-            <button class="preset" onclick="qp(3,'s-tasa',this)">3%</button>
-            <button class="preset" onclick="qp(5,'s-tasa',this)">5%</button>
-            <button class="preset" onclick="qp(10,'s-tasa',this)">10%</button>
-            <button class="preset" onclick="qp(25,'s-tasa',this)">25%</button>
-            <button class="preset" onclick="qp(50,'s-tasa',this)">50%</button>
-            <button class="preset" onclick="qp(100,'s-tasa',this)">100%</button>
-            <button class="preset" onclick="qp(4.69,'s-tasa',this)">MXN 24</button>
-            <button class="preset" onclick="qp(211,'s-tasa',this)">ARS 23</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANEL COMPUESTA -->
-      <div class="card" id="panel-compuesta" style="display:none">
-        <div class="card-hdr"><div class="card-hdr-icon">📈</div><div class="card-title">Inflación Compuesta Anual</div></div>
-        <div class="field">
-          <label>Monto inicial <span class="lbl-tag">BASE</span></label>
-          <div class="iw"><span class="ip" id="sy-c">$</span>
-          <input type="number" id="c-monto" inputmode="decimal" placeholder="10,000.00" min="0" step="0.01"></div>
-        </div>
-        <div class="field">
-          <label>Tasa anual <span class="lbl-tag">%</span></label>
-          <div class="iw"><span class="ip">%</span>
-          <input type="number" id="c-tasa" inputmode="decimal" placeholder="6.5" min="0" step="0.1"></div>
-        </div>
-        <div class="field">
-          <label>Años <span class="lbl-tag">N</span></label>
-          <div class="iw"><span class="ip">#</span>
-          <input type="number" id="c-anios" inputmode="numeric" placeholder="10" min="1" max="50" step="1"></div>
-        </div>
-        <div class="field">
-          <label>Moneda</label>
-          <div class="iw"><select id="c-mon" class="nopre" onchange="chgSym('c')">
-            <option value="$">🇲🇽 Peso MXN</option>
-            <option value="US$">🇺🇸 Dólar USD</option>
-            <option value="€">🇪🇺 Euro</option>
-            <option value="$">🇦🇷 Peso ARS</option>
-            <option value="S/.">🇵🇪 Sol PEN</option>
-            <option value="COP$">🇨🇴 Peso COP</option>
-          </select></div>
-        </div>
-      </div>
-
-      <!-- PANEL PROYECCIÓN -->
-      <div class="card" id="panel-proyeccion" style="display:none">
-        <div class="card-hdr"><div class="card-hdr-icon">🔭</div><div class="card-title">Proyección Futura</div></div>
-        <div class="field">
-          <label>Monto base <span class="lbl-tag">$</span></label>
-          <div class="iw"><span class="ip">$</span>
-          <input type="number" id="p-monto" inputmode="decimal" placeholder="10,000.00" min="0" step="0.01"></div>
-        </div>
-        <div class="field">
-          <label>Tasa anual estimada <span class="lbl-tag">%</span></label>
-          <div class="iw"><span class="ip">%</span>
-          <input type="number" id="p-tasa" inputmode="decimal" placeholder="8.0" min="0" step="0.1"></div>
-        </div>
-        <div class="field">
-          <label>Horizonte: <span id="lbl-h" style="color:var(--green)">5</span> años</label>
-          <input type="range" id="r-h" min="1" max="10" value="5" oninput="updH(this.value)" style="--rp:44%">
-          <div class="rl"><span>1 año</span><span>5 años</span><span>10 años</span></div>
-        </div>
-      </div>
-
-      <!-- PANEL COMPARAR -->
-      <div class="card" id="panel-comparar" style="display:none">
-        <div class="card-hdr"><div class="card-hdr-icon">⚖️</div><div class="card-title">Comparar 2 Escenarios</div></div>
-        <div class="field">
-          <label>Monto base <span class="lbl-tag">$</span></label>
-          <div class="iw"><span class="ip">$</span>
-          <input type="number" id="cmp-monto" inputmode="decimal" placeholder="5,000.00" min="0" step="0.01"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1px;margin-bottom:6px">▸ ESCENARIO A</div>
-            <div class="field" style="margin-bottom:8px">
-              <label>Tasa % / año</label>
-              <div class="iw"><span class="ip">%</span>
-              <input type="number" id="cmp-a-tasa" inputmode="decimal" placeholder="5"></div>
-            </div>
-            <div class="field">
-              <label>Años</label>
-              <div class="iw"><span class="ip">#</span>
-              <input type="number" id="cmp-a-anios" inputmode="numeric" placeholder="5"></div>
-            </div>
-          </div>
-          <div>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:1px;margin-bottom:6px">▸ ESCENARIO B</div>
-            <div class="field" style="margin-bottom:8px">
-              <label>Tasa % / año</label>
-              <div class="iw"><span class="ip" style="color:var(--amber)">%</span>
-              <input type="number" id="cmp-b-tasa" inputmode="decimal" placeholder="12"></div>
-            </div>
-            <div class="field">
-              <label>Años</label>
-              <div class="iw"><span class="ip" style="color:var(--amber)">#</span>
-              <input type="number" id="cmp-b-anios" inputmode="numeric" placeholder="5"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div>
-        <button class="btn-go" onclick="calc()">▶ EJECUTAR ANÁLISIS</button>
-        <button class="btn-clr" onclick="resetAll()">↺ LIMPIAR DATOS</button>
-      </div>
-
-      <!-- RESULTADOS -->
-      <div class="results" id="res-box">
-        <div class="card">
-          <div class="card-hdr"><div class="card-hdr-icon">📊</div><div class="card-title">Análisis de Resultados</div></div>
-          <div class="rg" id="rg"></div>
-        </div>
-        <div class="card" id="proj-card" style="display:none">
-          <div class="card-hdr"><div class="card-hdr-icon">📋</div><div class="card-title">Tabla Proyección</div></div>
-          <div style="overflow-x:auto">
-            <table class="ptbl">
-              <thead><tr><th>AÑO</th><th>ACUM %</th><th>VALOR NOM.</th><th>PODER REAL</th></tr></thead>
-              <tbody id="ptbody"></tbody>
-            </table>
-          </div>
-          <div class="bar-chart" id="bar-chart"></div>
-        </div>
-        <div class="card" id="cmp-result-card" style="display:none">
-          <div class="card-hdr"><div class="card-hdr-icon">⚖️</div><div class="card-title">Comparativa</div></div>
-          <div class="cmp-grid" id="cmp-grid"></div>
-        </div>
-        <button class="btn-save" onclick="saveHist()">＋ GUARDAR EN HISTORIAL</button>
-      </div>
-
+  <div id="form-simple" class="card" style="display:block">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Inflación Simple</h3>
+    <div class="form-group">
+      <label class="form-label">Monto Inicial</label>
+      <input type="number" id="s-monto" class="form-input" placeholder="$0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tasa Anual (%)</label>
+      <input type="number" id="s-tasa" class="form-input" placeholder="5.0" min="0" step="0.1">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcular('simple')">CALCULAR</button>
+      <button class="btn btn-secondary" onclick="resetForm('simple')">LIMPIAR</button>
     </div>
   </div>
 
-  <!-- PAGE: REFERENCIA -->
-  <div class="page" id="page-ref">
-    <div class="cards" style="padding-top:16px">
-
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-icon">🌎</div><div class="card-title">Tasas de Inflación 2024–2025</div></div>
-        <div class="rate-grid">
-          <div class="rate-chip"><span class="rc-flag">🇲🇽</span><span class="rc-name">México</span><span class="rc-val mid">4.69%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇺🇸</span><span class="rc-name">EE.UU.</span><span class="rc-val lo">3.2%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇦🇷</span><span class="rc-name">Argentina</span><span class="rc-val hi">211%</span><span class="rc-yr">anual 2023</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇧🇷</span><span class="rc-name">Brasil</span><span class="rc-val mid">4.6%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇨🇴</span><span class="rc-name">Colombia</span><span class="rc-val mid">7.8%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇪🇺</span><span class="rc-name">Eurozona</span><span class="rc-val lo">2.4%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇨🇱</span><span class="rc-name">Chile</span><span class="rc-val mid">4.5%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇵🇪</span><span class="rc-name">Perú</span><span class="rc-val lo">2.1%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇻🇪</span><span class="rc-name">Venezuela</span><span class="rc-val hi">189%</span><span class="rc-yr">anual 2024</span></div>
-          <div class="rate-chip"><span class="rc-flag">🇬🇧</span><span class="rc-name">UK</span><span class="rc-val lo">2.3%</span><span class="rc-yr">anual 2024</span></div>
-        </div>
-        <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--text-dim);letter-spacing:.5px">* Datos referenciales. Verificar: INEGI, FMI, Banco Mundial.</div>
-      </div>
-
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-icon">🧮</div><div class="card-title">Fórmulas del Motor</div></div>
-        <div class="fml"><code>SIMPLE:
-  VF = M × (1 + t/100)
-  Diferencia = VF − M
-
-COMPUESTA ANUAL:
-  VF = M × (1 + r)ⁿ    donde r = t/100
-
-PODER ADQUISITIVO:
-  PA = M ÷ (1 + t/100)ⁿ
-
-DEVALUACIÓN REAL:
-  Dev = (1 − 1/(1 + t/100)) × 100
-
-REGLA DEL 70:
-  Años para duplicar ≈ 70 ÷ tasa_anual
-
-INFLACIÓN ACUMULADA:
-  IACum = ((1 + r)ⁿ − 1) × 100</code></div>
-      </div>
-
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-icon">📚</div><div class="card-title">¿Qué Mide la Inflación?</div></div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);line-height:1.8">
-          La <span style="color:var(--green)">inflación</span> mide el aumento generalizado y sostenido del nivel de precios de bienes y servicios en una economía durante un período determinado.<br><br>
-          A mayor inflación → mayor erosión del <span style="color:var(--blue)">poder adquisitivo</span> real del dinero. Un peso de hoy vale menos que un peso mañana en entornos inflacionarios.
-        </div>
-      </div>
-
+  <div id="form-compuesta" class="card" style="display:none">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Inflación Compuesta</h3>
+    <div class="form-group">
+      <label class="form-label">Monto Inicial</label>
+      <input type="number" id="c-monto" class="form-input" placeholder="$0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tasa Anual (%)</label>
+      <input type="number" id="c-tasa" class="form-input" placeholder="5.0" min="0" step="0.1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Período (años)</label>
+      <input type="number" id="c-anios" class="form-input" placeholder="5" min="1" step="1" max="50">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcular('compuesta')">CALCULAR</button>
+      <button class="btn btn-secondary" onclick="resetForm('compuesta')">LIMPIAR</button>
     </div>
   </div>
 
-  <!-- PAGE: HISTORIAL -->
-  <div class="page" id="page-hist">
-    <div class="cards" style="padding-top:16px">
-      <div class="card">
-        <div class="card-hdr" style="justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="card-hdr-icon">🕑</div>
-            <div class="card-title">Historial de Análisis</div>
-          </div>
-          <button onclick="clrHist()" style="font-family:var(--mono);font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;letter-spacing:1px">BORRAR</button>
-        </div>
-        <div id="hist-wrap"></div>
-      </div>
+  <div id="form-proyeccion" class="card" style="display:none">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Proyección 10 Años</h3>
+    <div class="form-group">
+      <label class="form-label">Monto Inicial</label>
+      <input type="number" id="p-monto" class="form-input" placeholder="$0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tasa Anual (%)</label>
+      <input type="number" id="p-tasa" class="form-input" placeholder="5.0" min="0" step="0.1">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="calcular('proyeccion')">PROYECTAR</button>
+      <button class="btn btn-secondary" onclick="resetForm('proyeccion')">LIMPIAR</button>
     </div>
   </div>
 
-  <!-- PAGE: ACERCA -->
-  <div class="page" id="page-about">
-    <div class="cards" style="padding-top:16px">
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-icon">🔗</div><div class="card-title">Repositorio GitHub</div></div>
-        <div class="qr-section">
-          <div class="qr-frame">
-            <img id="qr-img" class="qr-inner" src="data:image/jpeg;base64,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nAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqDQnAAAAAAAAKs0JAAAAAACASnMCAAAAAACg0pwAAAAAAACoNCcAAAAAAAAqzQkAAAAAAIBKcwIAAAAAAKDSnAAAAAAAAKg0JwAAAAAAACrNCQAAAAAAgEpzAgAAAAAAoNKcAAAAAAAAqP4BKQlfxlwg1XYAAAAASUVORK5CYII=" alt="QR Repositorio GitHub" style="width:110px;height:110px;border-radius:6px;display:block;" />
-          </div>
-          <div class="qr-lbl">ESCANEA PARA VER EL REPOSITORIO</div>
-          <div class="qr-url">https://edheller33.github.io/Calculadora-de-inflaci-n-/</div>
-        </div>
-        <div style="margin-top:14px">
-          <div class="info-row"><span class="info-k">APP</span><span class="info-v">Dr. Nexus Inflation Analyzer</span></div>
-          <div class="info-row"><span class="info-k">VERSIÓN</span><span class="info-v">3.1.0-PWA</span></div>
-          <div class="info-row"><span class="info-k">MOTOR</span><span class="info-v">Vanilla JS — Sin frameworks</span></div>
-          <div class="info-row"><span class="info-k">TIPO</span><span class="info-v">Progressive Web App</span></div>
-          <div class="info-row"><span class="info-k">MODOS</span><span class="info-v">Simple / Compuesta / Proyección / Comparar</span></div>
-          <div class="info-row"><span class="info-k">OFFLINE</span><span class="info-v">✓ Service Worker activo</span></div>
-          <div class="info-row"><span class="info-k">STORAGE</span><span class="info-v">✓ LocalStorage (historial)</span></div>
-          <div class="info-row"><span class="info-k">TARGET</span><span class="info-v">Samsung Galaxy A34 / Android 16</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-icon">⚙️</div><div class="card-title">Instrucciones GitHub Pages</div></div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);line-height:2">
-          <span style="color:var(--green)">1.</span> Crea repo en github.com<br>
-          <span style="color:var(--green)">2.</span> Sube este archivo como <span style="color:var(--amber)">index.html</span><br>
-          <span style="color:var(--green)">3.</span> Settings → Pages → Branch: main / root<br>
-          <span style="color:var(--green)">4.</span> URL: <span style="color:var(--blue)">https://[user].github.io/[repo]/</span><br>
-          <span style="color:var(--green)">5.</span> Actualiza la URL en el QR de esta sección
-        </div>
-      </div>
-    </div>
+  <div id="results-box" class="results-box">
+    <div id="results-content"></div>
+    <button class="btn btn-secondary" onclick="saveHistory()" style="width:100%;margin-top:12px">💾 GUARDAR</button>
   </div>
-
-</div><!-- /main -->
-
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <button class="ni active" id="nav-calc" onclick="goPage('calc')">
-    <div class="ni-ico">⚡</div><div class="ni-lbl">Calc</div>
-  </button>
-  <button class="ni" id="nav-ref" onclick="goPage('ref')">
-    <div class="ni-ico">📊</div><div class="ni-lbl">Datos</div>
-  </button>
-  <button class="ni" id="nav-hist" onclick="goPage('hist')">
-    <div class="ni-ico">🕑</div><div class="ni-lbl">Historial</div>
-  </button>
-  <button class="ni" id="nav-about" onclick="goPage('about')">
-    <div class="ni-ico">🔗</div><div class="ni-lbl">GitHub</div>
-  </button>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- PAGE: GASTOS -->
+<div id="pg-gastos" class="page">
+  <div class="balance-card">
+    <div class="balance-label">Saldo del Mes</div>
+    <div class="balance-amount" id="balance-total">$0.00</div>
+    <div class="balance-stats">
+      <div class="stat-item">
+        <div class="stat-label">Ingresos</div>
+        <div class="stat-value" style="color:#10b981" id="balance-income">+$0.00</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Gastos</div>
+        <div class="stat-value" style="color:#ef4444" id="balance-expense">-$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Nuevo Movimiento</h3>
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <select id="tx-type" class="form-select">
+        <option value="expense">💸 Gasto</option>
+        <option value="income">💵 Ingreso</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría</label>
+      <select id="tx-category" class="form-select">
+        <option value="food">🍔 Alimentación</option>
+        <option value="transport">🚗 Transporte</option>
+        <option value="services">💡 Servicios</option>
+        <option value="health">⚕️ Salud</option>
+        <option value="entertainment">🎬 Entretenimiento</option>
+        <option value="salary">💼 Salario</option>
+        <option value="other">📌 Otro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input type="text" id="tx-desc" class="form-input" placeholder="Ej: Supermercado">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cantidad</label>
+      <input type="number" id="tx-amount" class="form-input" placeholder="0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input type="date" id="tx-date" class="form-input">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="addTransaction()">AGREGAR</button>
+      <button class="btn btn-secondary" onclick="clearTxForm()">LIMPIAR</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Movimientos</h3>
+    <div id="tx-list" class="tx-list">
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text">Sin movimientos este mes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORIAL -->
+<div id="pg-historial" class="page">
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px;color:var(--text)">Historial de Cálculos</h3>
+    <div id="history-list">
+      <div class="empty">
+        <div class="empty-icon">📂</div>
+        <div class="empty-text">Sin cálculos guardados</div>
+      </div>
+    </div>
+    <button class="btn btn-danger" onclick="clearHistory()" style="width:100%;margin-top:12px">🗑️ LIMPIAR HISTORIAL</button>
+  </div>
+</div>
+
+</div>
+
+<div id="toast"></div>
 
 <script>
-// ─── MATRIX RAIN ────────────────────────────────────────────────────────────
-(function(){
-  var c=document.getElementById('matrix-canvas');
-  var ctx=c.getContext('2d');
-  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
-  resize();window.addEventListener('resize',resize);
-  var chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノ$%&NEXUS';
-  var cols=Math.floor(window.innerWidth/14);
-  var drops=Array.from({length:cols},()=>Math.random()*-50);
-  function draw(){
-    ctx.fillStyle='rgba(10,10,10,0.05)';ctx.fillRect(0,0,c.width,c.height);
-    ctx.fillStyle='#00ff41';ctx.font='12px monospace';
-    drops.forEach(function(y,i){
-      var ch=chars[Math.floor(Math.random()*chars.length)];
-      ctx.fillText(ch,i*14,y*14);
-      if(y*14>c.height&&Math.random()>0.975)drops[i]=0;
-      drops[i]++;
-    });
-  }
-  setInterval(draw,60);
-})();
+var history=JSON.parse(localStorage.getItem('nexus_history')||'[]');
+var transactions=JSON.parse(localStorage.getItem('nexus_transactions')||'[]');
+var currentMode='simple';
 
-// ─── CLOCK ──────────────────────────────────────────────────────────────────
-function tickClock(){
-  var d=new Date();
-  var h=String(d.getHours()).padStart(2,'0');
-  var m=String(d.getMinutes()).padStart(2,'0');
-  var s=String(d.getSeconds()).padStart(2,'0');
-  document.getElementById('hdr-clock').textContent=h+':'+m+':'+s;
-}
-tickClock();setInterval(tickClock,1000);
+function n2(n){return new Intl.NumberFormat('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)}
+function formatCurrency(n){return '$'+n2(n)}
 
-// ─── GAUGE ──────────────────────────────────────────────────────────────────
-function updGauge(pct){
-  var cl=Math.min(Math.max(pct,0),100);
-  var tot=367;
-  document.getElementById('gf').style.strokeDashoffset=tot-(tot*cl/100);
-  var deg=-90+(cl/100*180);
-  document.getElementById('gneedle').style.transform='rotate('+deg+'deg)';
-  var col=cl<20?'#00ff41':cl<50?'#ffaa00':'#ff3355';
-  var el=document.getElementById('gval');
-  el.innerHTML=pct.toFixed(2)+'<span style="font-size:20px">%</span>';
-  el.style.color=col;
-  el.style.textShadow='0 0 40px '+col+'80';
-}
-function updGaugeSub(final,diff,pa,sym){
-  sym=sym||'$';
-  document.getElementById('gs-final').textContent=sym+' '+n2(final);
-  document.getElementById('gs-diff').textContent='+'+sym+' '+n2(diff);
-  document.getElementById('gs-pa').textContent=sym+' '+n2(pa);
-}
-function n2(n){return n.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fp(n){return(n>=0?'+':'')+n.toFixed(2)+'%';}
-
-// ─── NAVIGATION ─────────────────────────────────────────────────────────────
-var curPage='calc';
-function goPage(p){
-  ['calc','ref','hist','about'].forEach(function(x){
-    document.getElementById('page-'+x).classList.toggle('active',x===p);
-    document.getElementById('nav-'+x).classList.toggle('active',x===p);
-  });
-  curPage=p;
-  if(p==='hist')renderHist();
-  if(p==='about')renderQR();
+function switchPage(page,e){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('pg-'+page).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  e.target.classList.add('active');
 }
 
-// ─── MODE ───────────────────────────────────────────────────────────────────
-var curMode='simple';
-function setMode(m){
-  curMode=m;
-  ['simple','compuesta','proyeccion','comparar'].forEach(function(x){
-    document.getElementById('panel-'+x).style.display=x===m?'block':'none';
-  });
-  document.querySelectorAll('.tab').forEach(function(t,i){
-    t.classList.toggle('active',['simple','compuesta','proyeccion','comparar'][i]===m);
-  });
-  document.getElementById('res-box').classList.remove('on');
-  updGauge(0);
-  document.getElementById('gs-final').textContent='—';
-  document.getElementById('gs-diff').textContent='—';
-  document.getElementById('gs-pa').textContent='—';
+function setMode(mode){
+  currentMode=mode;
+  document.querySelectorAll('[id^="form-"]').forEach(x=>x.style.display='none');
+  document.getElementById('form-'+mode).style.display='block';
+  document.querySelectorAll('.btn-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-mode="'+mode+'"]').classList.add('active');
 }
 
-function chgSym(p){
-  var sym=document.getElementById(p+'-mon').value;
-  document.getElementById('sy-'+p).textContent=sym;
-}
-function updH(v){
-  document.getElementById('lbl-h').textContent=v;
-  document.getElementById('r-h').style.setProperty('--rp',((v-1)/9*100)+'%');
-}
-function qp(v,id,btn){
-  document.getElementById(id).value=v;
-  document.querySelectorAll('.presets .preset').forEach(function(b){b.classList.remove('sel')});
-  btn.classList.add('sel');
-}
-
-// ─── CALC ───────────────────────────────────────────────────────────────────
-var lastResult=null;
-function calc(){
-  var rg=document.getElementById('rg');
-  var box=document.getElementById('res-box');
-  var pc=document.getElementById('proj-card');
-  var cc=document.getElementById('cmp-result-card');
-  pc.style.display='none';cc.style.display='none';
-
-  if(curMode==='simple'){
-    var monto=parseFloat(document.getElementById('s-monto').value);
-    var tasa=parseFloat(document.getElementById('s-tasa').value);
-    var sym=document.getElementById('s-mon').value;
-    if(!v(monto,tasa))return;
-    var final=monto*(1+tasa/100);
-    var diff=final-monto;
-    var pa=monto/(1+tasa/100);
-    var dev=(tasa/(100+tasa)*100);
-    var r70=tasa>0?(70/tasa):null;
-    lastResult={monto,tasa,final,diff,pa,sym,mode:'simple'};
-    updGauge(Math.min(tasa,100));
-    updGaugeSub(final,diff,pa,sym);
-    rg.innerHTML=
-      ri('hl full','💰','Valor ajustado por inflación',sym+' '+n2(final),'g','Para mantener el mismo poder adquisitivo')+
-      ri(tasa>=15?'warn':'','📉','Incremento nominal','+'+sym+' '+n2(diff),tasa>=15?'r':'a',fp(tasa)+' inflación total')+
-      ri('good','🛒','Poder adquisitivo real',sym+' '+n2(pa),'b','Equivalencia actual del monto')+
-      ri('warn','🔥','Devaluación real del dinero','-'+dev.toFixed(2)+'%','r','Erosión efectiva del poder de compra')+
-      (r70?ri('','⏱','Regla del 70 — Años p/duplicar','~'+r70.toFixed(1)+' años','a','A tasa constante del '+tasa+'% anual'):'');
-
-  }else if(curMode==='compuesta'){
-    var monto=parseFloat(document.getElementById('c-monto').value);
-    var tasa=parseFloat(document.getElementById('c-tasa').value);
-    var anios=parseInt(document.getElementById('c-anios').value);
-    var sym=document.getElementById('c-mon').value;
-    if(!v(monto,tasa)||isNaN(anios)||anios<1){toast('⚠ Completa todos los campos');return;}
-    var r=tasa/100;
-    var final=monto*Math.pow(1+r,anios);
-    var diff=final-monto;
-    var acum=(Math.pow(1+r,anios)-1)*100;
-    var pa=monto/Math.pow(1+r,anios);
-    var r70=tasa>0?(70/tasa):null;
-    lastResult={monto,tasa,anios,final,diff,acum,pa,sym,mode:'compuesta'};
-    updGauge(Math.min(acum,100));
-    updGaugeSub(final,diff,pa,sym);
-    rg.innerHTML=
-      ri('hl full','📈','Valor nominal tras '+anios+' año'+(anios>1?'s':''),sym+' '+n2(final),'g','Inflación compuesta (1+r)ⁿ')+
-      ri('warn','🌡','Inflación acumulada total','+'+acum.toFixed(2)+'%','r',tasa+'% anual × '+anios+' años')+
-      ri('','💵','Incremento monetario total','+'+sym+' '+n2(diff),'a','Diferencia nominal')+
-      ri('good','🛒','Poder real en '+anios+' años',sym+' '+n2(pa),'b','Tu dinero de hoy, expresado en pesos futuros')+
-      ri('warn','📉','Pérdida poder adquisitivo','-'+((1-pa/monto)*100).toFixed(2)+'%','r','Erosión compuesta del capital')+
-      (r70?ri('','⏱','Años para duplicar precios','~'+r70.toFixed(1)+' años','a','Regla del 70'):'');
-
-  }else if(curMode==='proyeccion'){
-    var monto=parseFloat(document.getElementById('p-monto').value);
-    var tasa=parseFloat(document.getElementById('p-tasa').value);
-    var horizon=parseInt(document.getElementById('r-h').value);
-    if(!v(monto,tasa))return;
-    var r=tasa/100;
-    var rows='';var bars='';
-    var maxAcum=(Math.pow(1+r,horizon)-1)*100;
-    for(var y=1;y<=horizon;y++){
-      var acum=(Math.pow(1+r,y)-1)*100;
-      var val=monto*Math.pow(1+r,y);
-      var pa=monto/Math.pow(1+r,y);
-      var cls=acum>80?'hi':acum>40?'mid':'lo';
-      rows+='<tr><td>'+y+'</td><td class="'+cls+'">+'+acum.toFixed(1)+'%</td><td>$'+n2(val)+'</td><td class="lo">$'+n2(pa)+'</td></tr>';
-      var bpct=Math.round(acum/Math.max(maxAcum,1)*100);
-      var bcol=acum>80?'#ff3355':acum>40?'#ffaa00':'#00ff41';
-      bars+='<div class="bar-row"><span class="bar-yr">Año '+y+'</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:'+bcol+'" data-w="'+bpct+'%"></div></div><span class="bar-val">+'+acum.toFixed(1)+'%</span></div>';
-    }
-    var finalAcum=(Math.pow(1+r,horizon)-1)*100;
-    lastResult={monto,tasa,horizon,finalAcum,mode:'proyeccion'};
-    updGauge(Math.min(finalAcum,100));
-    updGaugeSub(monto*Math.pow(1+r,horizon),monto*(Math.pow(1+r,horizon)-1),monto/Math.pow(1+r,horizon),'$');
-    rg.innerHTML=
-      ri('hl full','🔭','Inflación acumulada en '+horizon+' años','+'+finalAcum.toFixed(2)+'%','g','A '+tasa+'% anual constante')+
-      ri('warn','💸','Valor nominal final','$'+n2(monto*Math.pow(1+r,horizon)),'r','Lo que cuestan las cosas en '+horizon+' años')+
-      ri('good','🛒','Poder adquisitivo residual','$'+n2(monto/Math.pow(1+r,horizon)),'b','Tu dinero de hoy, en '+horizon+' años');
-    document.getElementById('ptbody').innerHTML=rows;
-    document.getElementById('bar-chart').innerHTML=bars;
-    pc.style.display='block';
-    setTimeout(function(){
-      document.querySelectorAll('.bar-fill').forEach(function(el){
-        el.style.width=el.getAttribute('data-w');
-        el.style.transition='width 1s cubic-bezier(.4,0,.2,1)';
-      });
-    },100);
-
-  }else if(curMode==='comparar'){
-    var monto=parseFloat(document.getElementById('cmp-monto').value);
-    var aT=parseFloat(document.getElementById('cmp-a-tasa').value);
-    var aA=parseInt(document.getElementById('cmp-a-anios').value);
-    var bT=parseFloat(document.getElementById('cmp-b-tasa').value);
-    var bA=parseInt(document.getElementById('cmp-b-anios').value);
-    if(isNaN(monto)||monto<=0||isNaN(aT)||isNaN(aA)||isNaN(bT)||isNaN(bA)){toast('⚠ Completa todos los campos');return;}
-    function calcE(m,t,a){
-      var r=t/100;var vf=m*Math.pow(1+r,a);
-      return{vf:vf,diff:vf-m,acum:(Math.pow(1+r,a)-1)*100,pa:m/Math.pow(1+r,a)};
-    }
-    var A=calcE(monto,aT,aA);
-    var B=calcE(monto,bT,bA);
-    lastResult={monto,aT,aA,bT,bA,A,B,mode:'comparar'};
-    var pct=Math.max(A.acum,B.acum);
-    updGauge(Math.min(pct,100));
-    updGaugeSub(A.vf,A.diff,A.pa,'$');
-    rg.innerHTML=ri('hl full','⚖️','Brecha de inflación entre escenarios',Math.abs(A.acum-B.acum).toFixed(2)+'%',A.acum<B.acum?'g':'r','Diferencia acumulada A vs B');
-    document.getElementById('cmp-grid').innerHTML=
-      '<div class="cmp-col">'+
-        '<div class="cmp-hdr" style="color:var(--green)">▸ ESCENARIO A<br><span style="font-size:11px">'+aT+'% × '+aA+'a</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">VF</span><span class="cmp-v" style="color:var(--green)">$'+n2(A.vf)+'</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">ACUM</span><span class="cmp-v">+'+A.acum.toFixed(1)+'%</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">P.ADQ.</span><span class="cmp-v" style="color:var(--blue)">$'+n2(A.pa)+'</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">PÉRD.</span><span class="cmp-v" style="color:var(--red)">-'+((1-A.pa/monto)*100).toFixed(1)+'%</span></div>'+
-      '</div>'+
-      '<div class="cmp-col">'+
-        '<div class="cmp-hdr" style="color:var(--amber)">▸ ESCENARIO B<br><span style="font-size:11px">'+bT+'% × '+bA+'a</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">VF</span><span class="cmp-v" style="color:var(--amber)">$'+n2(B.vf)+'</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">ACUM</span><span class="cmp-v">+'+B.acum.toFixed(1)+'%</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">P.ADQ.</span><span class="cmp-v" style="color:var(--blue)">$'+n2(B.pa)+'</span></div>'+
-        '<div class="cmp-row"><span class="cmp-k">PÉRD.</span><span class="cmp-v" style="color:var(--red)">-'+((1-B.pa/monto)*100).toFixed(1)+'%</span></div>'+
-      '</div>';
-    cc.style.display='block';
-  }
-
-  box.classList.add('on');
-  setTimeout(function(){box.scrollIntoView({behavior:'smooth',block:'nearest'});},120);
-}
-
-function ri(cls,ico,lbl,val,valcls,sub){
-  return '<div class="ri '+cls+'"><div class="rl2">'+lbl+'</div><div class="rv '+valcls+'">'+val+'</div>'+(sub?'<div class="rsub">'+sub+'</div>':'')+'</div>';
-}
-function v(monto,tasa){
-  if(isNaN(monto)||monto<=0||isNaN(tasa)){toast('⚠ Completa los campos requeridos');return false;}
-  return true;
-}
-
-// ─── RESET ──────────────────────────────────────────────────────────────────
-function resetAll(){
-  ['s-monto','s-tasa','c-monto','c-tasa','c-anios','p-monto','p-tasa','cmp-monto','cmp-a-tasa','cmp-a-anios','cmp-b-tasa','cmp-b-anios'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.value='';
-  });
-  document.getElementById('res-box').classList.remove('on');
-  document.querySelectorAll('.preset').forEach(function(b){b.classList.remove('sel');});
-  updGauge(0);
-  document.getElementById('gs-final').textContent='—';
-  document.getElementById('gs-diff').textContent='—';
-  document.getElementById('gs-pa').textContent='—';
-  lastResult=null;
-}
-
-// ─── HISTORIAL ──────────────────────────────────────────────────────────────
-var hist=JSON.parse(localStorage.getItem('nexus_hist')||'[]');
-function saveHist(){
-  if(!lastResult){toast('Nada que guardar');return;}
-  var now=new Date();
-  var e=Object.assign({},lastResult,{
-    fecha:now.toLocaleDateString('es-MX'),
-    hora:now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
-    id:Date.now()
-  });
-  hist.unshift(e);if(hist.length>30)hist.pop();
-  localStorage.setItem('nexus_hist',JSON.stringify(hist));
-  toast('✓ Guardado en historial');
-}
-function renderHist(){
-  var w=document.getElementById('hist-wrap');
-  if(!hist.length){
-    w.innerHTML='<div class="empty"><div class="empty-ico">📂</div>Sin análisis guardados<br><span style="font-size:9px;margin-top:6px;display:block">Realiza un cálculo y guárdalo</span></div>';
-    return;
-  }
-  w.innerHTML='<div class="hist-list">'+hist.map(function(h){
-    var pct=(h.acum||h.finalAcum||h.tasa||0);
-    var desc=h.mode==='simple'?'$'+n2(h.monto)+' × '+h.tasa+'%'
-      :h.mode==='compuesta'?'$'+n2(h.monto)+' × '+h.tasa+'% × '+h.anios+'a'
-      :h.mode==='proyeccion'?'Proyección '+h.horizon+'a @ '+h.tasa+'%'
-      :'Comparar A:'+h.aT+'% B:'+h.bT+'%';
-    return '<div class="hi-item"><div class="hi-top"><span class="hi-main">'+desc+'</span><span class="hi-pct">+'+parseFloat(pct).toFixed(1)+'%</span></div><div class="hi-sub">'+h.fecha+' '+h.hora+' — MODO '+h.mode.toUpperCase()+'</div></div>';
-  }).join('')+'</div>';
-}
-function clrHist(){
-  hist=[];localStorage.removeItem('nexus_hist');renderHist();toast('Historial eliminado');
-}
-
-// ─── TOAST ──────────────────────────────────────────────────────────────────
 function toast(msg){
   var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('on');
-  setTimeout(function(){t.classList.remove('on');},2600);
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ─── QR REAL (base64 embebido) ──────────────────────────────────────────────
-function renderQR(){
-  // El QR real ya está embebido como <img> con src base64.
-  // Esta función se mantiene por compatibilidad pero no hace nada.
+function calcular(modo){
+  var res=document.getElementById('results-content');
+  if(modo==='simple'){
+    var m=parseFloat(document.getElementById('s-monto').value);
+    var t=parseFloat(document.getElementById('s-tasa').value);
+    if(isNaN(m)||m<=0||isNaN(t)){toast('⚠ Completa los campos');return;}
+    var vf=m*(1+t/100);
+    history.unshift({type:'simple',monto:m,tasa:t,vf:vf,fecha:new Date().toLocaleString('es-MX')});
+    localStorage.setItem('nexus_history',JSON.stringify(history.slice(0,50)));
+    res.innerHTML=`
+      <div class="result-item success"><div class="result-label">Valor Final</div><div class="result-value">${formatCurrency(vf)}</div><div class="result-note">Tu dinero aumentó ${t.toFixed(1)}%</div></div>
+      <div class="result-item danger"><div class="result-label">Pérdida Poder Adquisitivo</div><div class="result-value">${formatCurrency(m-m/(1+t/100))}</div><div class="result-note">Dinero que pierde valor</div></div>
+    `;
+    document.getElementById('results-box').classList.add('show');
+  }else if(modo==='compuesta'){
+    var m=parseFloat(document.getElementById('c-monto').value);
+    var t=parseFloat(document.getElementById('c-tasa').value);
+    var a=parseInt(document.getElementById('c-anios').value);
+    if(isNaN(m)||m<=0||isNaN(t)||isNaN(a)||a<1){toast('⚠ Completa todos los campos');return;}
+    var r=t/100;var vf=m*Math.pow(1+r,a);
+    var acum=(Math.pow(1+r,a)-1)*100;
+    history.unshift({type:'compuesta',monto:m,tasa:t,anos:a,acum:acum,vf:vf,fecha:new Date().toLocaleString('es-MX')});
+    localStorage.setItem('nexus_history',JSON.stringify(history.slice(0,50)));
+    res.innerHTML=`
+      <div class="result-item success"><div class="result-label">Acumulado</div><div class="result-value">+${acum.toFixed(2)}%</div><div class="result-note">En ${a} años</div></div>
+      <div class="result-item warning"><div class="result-label">Valor Nominal Final</div><div class="result-value">${formatCurrency(vf)}</div><div class="result-note">Precio que alcanzan las cosas</div></div>
+      <div class="result-item success"><div class="result-label">P. Adquisitivo</div><div class="result-value">${formatCurrency(m/Math.pow(1+r,a))}</div><div class="result-note">Tu dinero en el futuro</div></div>
+    `;
+    document.getElementById('results-box').classList.add('show');
+  }else if(modo==='proyeccion'){
+    var m=parseFloat(document.getElementById('p-monto').value);
+    var t=parseFloat(document.getElementById('p-tasa').value);
+    if(isNaN(m)||m<=0||isNaN(t)){toast('⚠ Completa los campos');return;}
+    var r=t/100;var vf=m*Math.pow(1+r,10);var acum=(Math.pow(1+r,10)-1)*100;
+    history.unshift({type:'proyeccion',monto:m,tasa:t,acum:acum,vf:vf,fecha:new Date().toLocaleString('es-MX')});
+    localStorage.setItem('nexus_history',JSON.stringify(history.slice(0,50)));
+    res.innerHTML=`
+      <div class="result-item success"><div class="result-label">Proyección 10 Años</div><div class="result-value">+${acum.toFixed(2)}%</div><div class="result-note">Inflación acumulada</div></div>
+      <div class="result-item warning"><div class="result-label">Valor Futuro</div><div class="result-value">${formatCurrency(vf)}</div></div>
+      <div class="result-item success"><div class="result-label">Poder Adquisitivo</div><div class="result-value">${formatCurrency(m/Math.pow(1+r,10))}</div><div class="result-note">Tu dinero de hoy</div></div>
+    `;
+    document.getElementById('results-box').classList.add('show');
+  }
+  setTimeout(()=>document.getElementById('results-box').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-updH(5);
-updGauge(0);
+function resetForm(modo){
+  if(modo==='simple')['s-monto','s-tasa'].forEach(id=>document.getElementById(id).value='');
+  if(modo==='compuesta')['c-monto','c-tasa','c-anios'].forEach(id=>document.getElementById(id).value='');
+  if(modo==='proyeccion')['p-monto','p-tasa'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('results-box').classList.remove('show');
+}
+
+function saveHistory(){toast('✓ Guardado en historial');renderHistory()}
+
+function renderHistory(){
+  var h=document.getElementById('history-list');
+  if(!history.length){
+    h.innerHTML='<div class="empty"><div class="empty-icon">📂</div><div class="empty-text">Sin cálculos guardados</div></div>';
+    return;
+  }
+  h.innerHTML=history.map((x,i)=>`
+    <div class="card" style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-weight:600">${x.type==='simple'?'Simple':x.type==='compuesta'?'Compuesta':'Proyección'}</span>
+        <button onclick="history.splice(${i},1);localStorage.setItem('nexus_history',JSON.stringify(history));renderHistory()" style="border:none;background:var(--danger);color:white;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px">🗑️</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-light)"><strong>${formatCurrency(x.monto)}</strong> @ ${x.tasa}%${x.anos?' × '+x.anos+'a':''}</div>
+      <div style="font-size:12px;color:var(--primary);margin-top:4px"><strong>${x.acum?'+'+x.acum.toFixed(2)+'%':'Calculado'}</strong></div>
+      <div style="font-size:11px;color:var(--text-lighter);margin-top:3px">${x.fecha}</div>
+    </div>
+  `).join('')+'';
+}
+
+function clearHistory(){
+  if(confirm('¿Eliminar todo el historial?')){
+    history=[];
+    localStorage.removeItem('nexus_history');
+    renderHistory();
+    toast('✓ Historial eliminado');
+  }
+}
+
+function setTodayDate(){
+  document.getElementById('tx-date').value=new Date().toISOString().split('T')[0];
+}
+
+function addTransaction(){
+  var type=document.getElementById('tx-type').value;
+  var cat=document.getElementById('tx-category').value;
+  var desc=document.getElementById('tx-desc').value.trim();
+  var amount=parseFloat(document.getElementById('tx-amount').value);
+  var date=document.getElementById('tx-date').value;
+  if(!desc||!amount||!date){toast('⚠ Completa todos los campos');return;}
+  transactions.push({id:Date.now(),type,cat,desc,amount,date});
+  localStorage.setItem('nexus_transactions',JSON.stringify(transactions));
+  clearTxForm();
+  renderTransactions();
+  updateBalance();
+  toast('✓ Movimiento agregado');
+}
+
+function clearTxForm(){
+  document.getElementById('tx-type').value='expense';
+  document.getElementById('tx-category').value='food';
+  document.getElementById('tx-desc').value='';
+  document.getElementById('tx-amount').value='';
+  setTodayDate();
+}
+
+function deleteTransaction(id){
+  transactions=transactions.filter(t=>t.id!==id);
+  localStorage.setItem('nexus_transactions',JSON.stringify(transactions));
+  renderTransactions();
+  updateBalance();
+  toast('✓ Eliminado');
+}
+
+function renderTransactions(){
+  var list=document.getElementById('tx-list');
+  var month=new Date().toISOString().substring(0,7);
+  var monthTx=transactions.filter(t=>t.date.substring(0,7)===month).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!monthTx.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Sin movimientos este mes</div></div>';
+    return;
+  }
+  var cats={food:'🍔',transport:'🚗',services:'💡',health:'⚕️',entertainment:'🎬',salary:'💼',other:'📌'};
+  list.innerHTML=monthTx.map(t=>`
+    <div class="tx-item ${t.type}">
+      <div class="tx-info">
+        <div class="tx-name">${cats[t.cat]||'📌'} ${t.desc}</div>
+        <div class="tx-meta"><span>${t.date}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${formatCurrency(t.amount)}</div>
+        <button onclick="deleteTransaction(${t.id})" style="border:none;background:transparent;color:var(--danger);cursor:pointer;margin-top:4px;font-size:12px">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateBalance(){
+  var month=new Date().toISOString().substring(0,7);
+  var monthTx=transactions.filter(t=>t.date.substring(0,7)===month);
+  var inc=monthTx.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+  var exp=monthTx.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
+  var bal=inc-exp;
+  document.getElementById('balance-total').textContent=formatCurrency(bal);
+  document.getElementById('balance-income').textContent='+'+formatCurrency(inc);
+  document.getElementById('balance-expense').textContent='-'+formatCurrency(exp);
+}
+
+setTodayDate();
+renderHistory();
+renderTransactions();
+updateBalance();
 </script>
+
 </body>
 </html>
